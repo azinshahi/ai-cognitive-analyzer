@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitive Security Analyzer (AI-Powered)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0e1117;
+      color: #f0f0f0;
+      text-align: center;
+      padding: 40px;
+    }
+    textarea {
+      width: 80%;
+      height: 100px;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #357ab8;
+    }
+    #feedbackBox {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 8px;
+      display: inline-block;
+      min-width: 60%;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Cognitive Security Analyzer</h1>
+  <p>Describe a user behavior, and AI will assess its cybersecurity risk.</p>
+  
+  <textarea id="userInput" placeholder="Example: I clicked on an unknown email link..."></textarea><br>
+  <button onclick="runAnalysis()">Analyze</button>
+  
+  <div id="feedbackBox">
+    <p id="result">Waiting for input...</p>
+  </div>
+
+  <script src="scripts/main.js"></script>
+</body>
+</html>
