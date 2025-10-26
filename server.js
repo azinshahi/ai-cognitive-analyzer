@@ -22,19 +22,26 @@ app.post('/analyze', async (req, res) => {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: 'You are a cybersecurity and human behavior expert. Respond in JSON with "risk" (high, medium, low) and "message" (one sentence explanation).' },
+        {
+          role: 'system',
+          content:
+            'You are a cybersecurity and human behavior expert. Respond **only in JSON** with fields "risk" (high, medium, low) and "message" (one sentence explanation).'
+        },
         { role: 'user', content: `Analyze this behavior: "${userInput}"` }
       ],
       temperature: 0.2
     });
 
-    // Attempt to parse AI output
+    let aiText = completion.choices[0].message.content;
+
+    // Remove Markdown code block if it exists
+    aiText = aiText.replace(/```json|```/g, '').trim();
+
     let aiResponse;
     try {
-      aiResponse = JSON.parse(completion.choices[0].message.content);
+      aiResponse = JSON.parse(aiText);
     } catch {
-      // Fallback if AI doesn't return JSON
-      aiResponse = { risk: 'medium', message: completion.choices[0].message.content };
+      aiResponse = { risk: 'medium', message: aiText };
     }
 
     res.json(aiResponse);
