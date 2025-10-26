@@ -1,47 +1,52 @@
-const express = require('express');
-const cors = require('cors');
-const { Configuration, OpenAIApi } = require('openai');
+// server.js
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import OpenAI from "openai";
 
 const app = express();
-const port = process.env.PORT || 3000;
-
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-const configuration = new Configuration({
+// initialize OpenAI with your Render environment variable
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-const openai = new OpenAIApi(configuration);
 
-app.post('/analyze', async (req, res) => {
+app.post("/analyze", async (req, res) => {
+  const { activity } = req.body;
+
+  if (!activity) {
+    return res.json({ risk: "none", message: "Please enter a behavior description." });
+  }
+
   try {
-    const { activity } = req.body;
-    if (!activity) return res.status(400).json({ error: 'Activity is required' });
+    const prompt = `
+You are a cybersecurity and human behavior expert.
+Analyze this behavior for cybersecurity risk and classify as High, Medium, or Low risk.
+Behavior: "${activity}"
+Respond in JSON: { "risk": "high/medium/low", "message": "<short explanation>" }
+    `;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are a cybersecurity and human behavior expert. Evaluate the risk of the given activity and provide a risk level (Low, Moderate, High) with a brief explanation.' },
-        { role: 'user', content: `Activity: ${activity}` }
-      ],
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
       temperature: 0.2
     });
 
-    const aiText = completion.choices[0].message.content;
-
-    let riskLevel = 'Moderate';
-    let explanation = aiText;
-    const match = aiText.match(/Risk Level: (\w+)/i);
-    if (match) {
-      riskLevel = match[1];
-      explanation = aiText.replace(match[0], '').trim();
+    let aiResponse;
+    try {
+      aiResponse = JSON.parse(completion.choices[0].message.content);
+    } catch {
+      aiResponse = { risk: "medium", message: "AI could not parse input." };
     }
 
-    res.json({ riskLevel, explanation });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to analyze activity' });
+    res.json(aiResponse);
+  } catch (error) {
+    console.error(error);
+    res.json({ risk: "medium", message: "Error analyzing behavior." });
   }
 });
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
