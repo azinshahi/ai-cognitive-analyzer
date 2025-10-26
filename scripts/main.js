@@ -1,43 +1,48 @@
-// scripts/main.js
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("riskForm");
+  const userInput = document.getElementById("userInput");
+  const resultBox = document.getElementById("result");
 
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('analyzer-form');
-    const input = document.getElementById('userInput');
-    const result = document.getElementById('result');
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    const input = userInput.value.trim();
+    if (!input) {
+      resultBox.textContent = "⚠️ Please enter a behavior description.";
+      resultBox.style.color = "orange";
+      return;
+    }
 
-        const userInput = input.value.trim();
-        if (!userInput) {
-            result.textContent = "⚠️ Please enter a behavior description.";
-            return;
-        }
+    resultBox.textContent = "Analyzing behavior...";
+    resultBox.style.color = "gray";
 
-        result.textContent = "⏳ Analyzing behavior...";
+    try {
+      const response = await fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userInput: input }),
+      });
 
-        try {
-            const response = await fetch('https://cognitive-analyzer-backend.onrender.com/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userInput })
-            });
+      const data = await response.json();
 
-            const data = await response.json();
+      if (data.risk) {
+        let color;
+        if (data.risk.toLowerCase() === "high") color = "red";
+        else if (data.risk.toLowerCase() === "medium") color = "orange";
+        else color = "green";
 
-            if (data.risk && data.message) {
-                result.innerHTML = `
-                    <strong>Risk Level:</strong> ${data.risk}<br>
-                    <em>${data.message}</em>
-                `;
-            } else {
-                result.textContent = "⚠️ Unexpected response from server.";
-            }
-        } catch (error) {
-            console.error(error);
-            result.textContent = "❌ Error connecting to the AI service.";
-        }
-    });
+        resultBox.innerHTML = `
+          <strong>Risk Level:</strong> <span style="color:${color};text-transform:capitalize">${data.risk}</span><br>
+          <strong>Explanation:</strong> ${data.message}
+        `;
+      } else {
+        resultBox.textContent = "⚠️ Unexpected response from AI.";
+        resultBox.style.color = "gray";
+      }
+    } catch (err) {
+      console.error(err);
+      resultBox.textContent = "❌ Error connecting to the AI service.";
+      resultBox.style.color = "red";
+    }
+  });
 });
