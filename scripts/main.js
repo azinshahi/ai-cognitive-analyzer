@@ -1,21 +1,41 @@
-// Temporary simple logic until we connect real AI
-async function runAnalysis() {
-    const input = document.getElementById("userInput").value;
-    const result = document.getElementById("result");
-    const feedbackBox = document.getElementById("feedbackBox");
+// scripts/main.js
 
-    if (!input.trim()) {
-        result.innerText = "Please enter a behavior first.";
-        feedbackBox.style.backgroundColor = "transparent";
-        return;
-    }
+// Replace with your actual Render backend URL
+const backendURL = 'https://cognitive-analyzer-backend.onrender.com/analyze';
 
-    // Temporary placeholder until AI connection
-    result.innerText = "Analyzing behavior...";
-    feedbackBox.style.backgroundColor = "#333";
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('activity-form');
+    const input = document.getElementById('activity-input');
+    const resultDiv = document.getElementById('result');
 
-    setTimeout(() => {
-        result.innerText = "This is a placeholder result — the AI connection comes next.";
-        feedbackBox.style.backgroundColor = "#555";
-    }, 1500);
-}
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const activity = input.value.trim();
+        if (!activity) return;
+
+        resultDiv.textContent = 'Analyzing...';
+
+        try {
+            const response = await fetch(backendURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ activity })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Display AI response
+            resultDiv.textContent = `Risk Level: ${data.riskLevel}\nExplanation: ${data.explanation}`;
+
+        } catch (error) {
+            console.error('Error:', error);
+            resultDiv.textContent = 'Error analyzing activity. Try again.';
+        }
+    });
+});
