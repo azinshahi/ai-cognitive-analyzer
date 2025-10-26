@@ -1,5 +1,3 @@
-// scripts/main.js
-
 // Replace with your actual Render backend URL
 const backendURL = 'https://cognitive-analyzer-backend.onrender.com/analyze';
 
@@ -18,21 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(backendURL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ activity })
             });
 
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
             const data = await response.json();
-
-            // Display AI response
             resultDiv.textContent = `Risk Level: ${data.riskLevel}\nExplanation: ${data.explanation}`;
-
         } catch (error) {
             console.error('Error:', error);
             resultDiv.textContent = 'Error analyzing activity. Try again.';
