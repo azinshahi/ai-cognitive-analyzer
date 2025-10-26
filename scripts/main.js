@@ -1,32 +1,45 @@
-// Replace with your actual Render backend URL
-const backendURL = 'https://cognitive-analyzer-backend.onrender.com/analyze';
+// scripts/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('activity-form');
-    const input = document.getElementById('activity-input');
-    const resultDiv = document.getElementById('result');
+    const form = document.getElementById('analyzer-form');
+    const input = document.getElementById('userInput');
+    const result = document.getElementById('result');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const activity = input.value.trim();
-        if (!activity) return;
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
-        resultDiv.textContent = 'Analyzing...';
+        const userInput = input.value.trim();
+        if (!userInput) {
+            result.textContent = "⚠️ Please enter a behavior description.";
+            return;
+        }
+
+        result.textContent = "⏳ Analyzing behavior...";
 
         try {
-            const response = await fetch(backendURL, {
+            const response = await fetch('https://cognitive-analyzer-backend.onrender.com/analyze', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ activity })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ activity: userInput })
             });
 
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
-
             const data = await response.json();
-            resultDiv.textContent = `Risk Level: ${data.riskLevel}\nExplanation: ${data.explanation}`;
+
+            if (data.riskLevel && data.explanation) {
+                result.innerHTML = `
+                    <strong>Risk Level:</strong> ${data.riskLevel}<br>
+                    <em>${data.explanation}</em>
+                `;
+            } else if (data.message) {
+                result.textContent = data.message;
+            } else {
+                result.textContent = "⚠️ Unexpected response from server.";
+            }
         } catch (error) {
-            console.error('Error:', error);
-            resultDiv.textContent = 'Error analyzing activity. Try again.';
+            console.error(error);
+            result.textContent = "❌ Error connecting to the AI service.";
         }
     });
 });
