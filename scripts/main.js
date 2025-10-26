@@ -1,3 +1,5 @@
+// scripts/main.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('analyzer-form');
     const input = document.getElementById('userInput');
@@ -26,7 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.risk && data.message) {
-                result.innerHTML = `<strong>Risk Level:</strong> ${data.risk}<br><em>${data.message}</em>`;
+                result.innerHTML = `
+                    <strong>Risk Level:</strong> ${data.risk}<br>
+                    <em>${data.message}</em>
+                `;
             } else {
                 result.textContent = "⚠️ Unexpected response from server.";
             }
