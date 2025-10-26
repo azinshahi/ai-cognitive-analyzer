@@ -7,42 +7,40 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// initialize OpenAI with environment variable
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
 app.post('/analyze', async (req, res) => {
-  const userInput = req.body.userInput; // exactly this
+  const userInput = req.body.userInput;
 
   if (!userInput) {
     return res.json({ risk: 'none', message: 'Please enter a behavior description.' });
   }
 
   try {
-    const prompt = `
-You are a cybersecurity and human behavior expert.
-Analyze this behavior for cybersecurity risk and classify as High, Medium, or Low risk.
-Behavior: "${userInput}"
-Respond in JSON: { "risk": "high/medium/low", "message": "<short explanation>" }
-    `;
-
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'system', content: 'You are a cybersecurity and human behavior expert. Respond in JSON with "risk" (high, medium, low) and "message" (one sentence explanation).' },
+        { role: 'user', content: `Analyze this behavior: "${userInput}"` }
+      ],
       temperature: 0.2
     });
 
+    // Attempt to parse AI output
     let aiResponse;
     try {
       aiResponse = JSON.parse(completion.choices[0].message.content);
     } catch {
-      aiResponse = { risk: 'medium', message: 'AI could not parse input.' };
+      // Fallback if AI doesn't return JSON
+      aiResponse = { risk: 'medium', message: completion.choices[0].message.content };
     }
 
     res.json(aiResponse);
-  } catch (error) {
-    console.error(error);
+
+  } catch (err) {
+    console.error(err);
     res.json({ risk: 'medium', message: 'Error analyzing behavior.' });
   }
 });
