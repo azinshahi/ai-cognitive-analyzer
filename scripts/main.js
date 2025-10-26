@@ -1,41 +1,44 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const analyzeBtn = document.getElementById("analyzeBtn");
-  const behaviorInput = document.getElementById("behaviorInput");
-  const resultDiv = document.getElementById("result");
+// Wait until the page is fully loaded before running the script
+document.addEventListener("DOMContentLoaded", function () {
+  // Get references to the input box, button, and result area
+  const inputBox = document.getElementById("behaviorInput");
+  const analyzeButton = document.getElementById("analyzeButton");
+  const resultArea = document.getElementById("result");
 
-  analyzeBtn.addEventListener("click", async () => {
-    const behavior = behaviorInput.value.trim();
+  // When the button is clicked, run this function
+  analyzeButton.addEventListener("click", function () {
+    const userInput = inputBox.value.trim();
 
-    if (!behavior) {
-      resultDiv.textContent = "⚠️ Please describe a behavior first.";
+    // If the input is empty, show a message and stop
+    if (userInput === "") {
+      resultArea.innerText = "Please enter a behavior to analyze.";
       return;
     }
 
-    resultDiv.textContent = "⏳ Analyzing behavior...";
+    // Show a loading message while waiting for the response
+    resultArea.innerText = "Analyzing...";
 
-    try {
-      const response = await fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ behavior })
+    // Send the behavior to the backend
+    fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ behavior: userInput })
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Display the AI's risk level and explanation
+        resultArea.innerText = `${data.risk.toUpperCase()}: ${data.message}`;
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        resultArea.innerText = "Something went wrong. Please try again.";
       });
-
-      const data = await response.json();
-
-      if (data && data.message) {
-        resultDiv.innerHTML = `
-          <strong>Risk Level:</strong> ${data.risk || "unknown"}<br>
-          <strong>Message:</strong> ${data.message}
-        `;
-      } else {
-        resultDiv.textContent = "❌ Unexpected response from the AI server.";
-      }
-
-    } catch (error) {
-      console.error("Error connecting to backend:", error);
-      resultDiv.textContent = "🚫 Could not connect to backend. Please try again later.";
-    }
   });
 });
