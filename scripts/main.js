@@ -1,25 +1,41 @@
-document.getElementById('analyze-btn').addEventListener('click', async () => {
-  const behavior = document.getElementById('behavior-input').value.trim();
-  const resultDiv = document.getElementById('result');
+document.addEventListener("DOMContentLoaded", () => {
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  const behaviorInput = document.getElementById("behaviorInput");
+  const resultDiv = document.getElementById("result");
 
-  if (!behavior) {
-    resultDiv.innerHTML = "⚠️ Please describe a behavior to analyze.";
-    return;
-  }
+  analyzeBtn.addEventListener("click", async () => {
+    const behavior = behaviorInput.value.trim();
 
-  resultDiv.innerHTML = "⏳ Analyzing behavior...";
+    if (!behavior) {
+      resultDiv.textContent = "⚠️ Please describe a behavior first.";
+      return;
+    }
 
-  try {
-    const response = await fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ behavior })
-    });
+    resultDiv.textContent = "⏳ Analyzing behavior...";
 
-    const data = await response.json();
-    resultDiv.innerHTML = `<strong>Risk Level:</strong> ${data.risk}<br><strong>Message:</strong> ${data.message}`;
-  } catch (error) {
-    resultDiv.innerHTML = "❌ Could not connect to backend. Please try again later.";
-    console.error(error);
-  }
+    try {
+      const response = await fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ behavior })
+      });
+
+      const data = await response.json();
+
+      if (data && data.message) {
+        resultDiv.innerHTML = `
+          <strong>Risk Level:</strong> ${data.risk || "unknown"}<br>
+          <strong>Message:</strong> ${data.message}
+        `;
+      } else {
+        resultDiv.textContent = "❌ Unexpected response from the AI server.";
+      }
+
+    } catch (error) {
+      console.error("Error connecting to backend:", error);
+      resultDiv.textContent = "🚫 Could not connect to backend. Please try again later.";
+    }
+  });
 });
