@@ -41,12 +41,12 @@ app.post('/analyze', async (req, res) => {
 
     res.json({ risk: 'high', message: reply });
   } catch (error) {
-    console.error('OpenAI error:', error);
+    console.error('🔴 OpenAI error:', error.response?.data || error.message);
     res.status(500).json({ risk: 'error', message: 'Failed to analyze behavior.' });
   }
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`🚀 Server running on port ${port}`);
 });
