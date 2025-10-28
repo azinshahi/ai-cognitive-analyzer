@@ -41,10 +41,10 @@ app.post('/analyze', async (req, res) => {
 
     if (!response.ok) {
       console.error('🔴 Anthropic error:', data);
-      return res.status(500).json({ risk: 'error', message: 'Anthropic API failed.' });
+      return res.status(500).json({ risk: 'error', message: data.error?.message || 'Anthropic API failed.' });
     }
 
-    const reply = data.content[0].text;
+    const reply = data.content?.[0]?.text || 'No response from Claude.';
     res.json({ risk: 'high', message: reply });
   } catch (error) {
     console.error('🔴 Unexpected error:', error.message);
