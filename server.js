@@ -1,56 +1,53 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const OpenAI = require('openai');
+import express from "express";
+import cors from "cors";
+import { OpenAI } from "openai";
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-app.post('/analyze', async (req, res) => {
-  const userInput = req.body.userInput;
+app.post("/analyze", async (req, res) => {
+  const behavior = req.body.behavior;
 
-  if (!userInput) {
-    return res.json({ risk: 'none', message: 'Please enter a behavior description.' });
+  if (!behavior || behavior.trim() === "") {
+    return res.json({
+      risk: "none",
+      message: "Please enter a behavior description."
+    });
   }
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
       messages: [
         {
-          role: 'system',
-          content:
-            'You are a cybersecurity and human behavior expert. Respond **only in JSON** with fields "risk" (high, medium, low) and "message" (one sentence explanation).'
+          role: "system",
+          content: "You are a cybersecurity expert. Classify user behavior as high, medium, or low risk and explain why."
         },
-        { role: 'user', content: `Analyze this behavior: "${userInput}"` }
+        {
+          role: "user",
+          content: behavior
+        }
       ],
-      temperature: 0.2
+      model: "gpt-3.5-turbo"
     });
 
-    let aiText = completion.choices[0].message.content;
+    const response = completion.choices[0].message.content;
+    const [riskRaw, ...messageParts] = response.split(":");
+    const risk = riskRaw.trim().toLowerCase();
+    const message = messageParts.join(":").trim();
 
-    // Remove Markdown code block if it exists
-    aiText = aiText.replace(/```json|```/g, '').trim();
-
-    let aiResponse;
-    try {
-      aiResponse = JSON.parse(aiText);
-    } catch {
-      aiResponse = { risk: 'medium', message: aiText };
-    }
-
-    res.json(aiResponse);
-
-  } catch (err) {
-    console.error(err);
-    res.json({ risk: 'medium', message: 'Error analyzing behavior.' });
+    res.json({ risk, message });
+  } catch (error) {
+    console.error("OpenAI error:", error);
+    res.status(500).json({ risk: "error", message: "Failed to analyze behavior." });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Backend running on port ${port}`);
+});
