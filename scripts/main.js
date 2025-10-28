@@ -6,32 +6,39 @@ document.addEventListener("DOMContentLoaded", function () {
   analyzeButton.addEventListener("click", function () {
     const userInput = inputBox.value;
 
+    // Show what input is being captured
+    resultArea.innerText = `Captured input: "${userInput}"`;
+
     if (!userInput || userInput.trim() === "") {
-      resultArea.innerText = "Please enter a behavior to analyze.";
+      setTimeout(() => {
+        resultArea.innerText = "Please enter a behavior to analyze.";
+      }, 1500);
       return;
     }
 
-    resultArea.innerText = "Analyzing...";
+    setTimeout(() => {
+      resultArea.innerText = "Analyzing...";
 
-    fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ behavior: userInput })
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
+      fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ behavior: userInput })
       })
-      .then(data => {
-        resultArea.innerText = `${data.risk.toUpperCase()}: ${data.message}`;
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        resultArea.innerText = "Something went wrong. Please try again.";
-      });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(data => {
+          resultArea.innerText = `${data.risk.toUpperCase()}: ${data.message}`;
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          resultArea.innerText = "Something went wrong. Please try again.";
+        });
+    }, 1500);
   });
 });
