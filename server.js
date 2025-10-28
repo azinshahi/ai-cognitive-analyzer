@@ -1,53 +1,52 @@
-import express from "express";
-import cors from "cors";
-import { OpenAI } from "openai";
+import express from 'express';
+import cors from 'cors';
+import OpenAI from 'openai';
 
 const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+// OpenAI setup
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-app.post("/analyze", async (req, res) => {
-  const behavior = req.body.behavior;
+// Endpoint
+app.post('/analyze', async (req, res) => {
+  const { behavior } = req.body;
 
-  if (!behavior || behavior.trim() === "") {
-    return res.json({
-      risk: "none",
-      message: "Please enter a behavior description."
-    });
+  if (!behavior) {
+    return res.status(400).json({ risk: 'error', message: 'No behavior provided.' });
   }
 
   try {
     const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
       messages: [
         {
-          role: "system",
-          content: "You are a cybersecurity expert. Classify user behavior as high, medium, or low risk and explain why."
+          role: 'system',
+          content: 'You are a cybersecurity assistant. Assess the risk level of user behavior and explain why.'
         },
         {
-          role: "user",
+          role: 'user',
           content: behavior
         }
-      ],
-      model: "gpt-3.5-turbo"
+      ]
     });
 
-    const response = completion.choices[0].message.content;
-    const [riskRaw, ...messageParts] = response.split(":");
-    const risk = riskRaw.trim().toLowerCase();
-    const message = messageParts.join(":").trim();
+    const reply = completion.choices[0].message.content;
 
-    res.json({ risk, message });
+    res.json({ risk: 'high', message: reply });
   } catch (error) {
-    console.error("OpenAI error:", error);
-    res.status(500).json({ risk: "error", message: "Failed to analyze behavior." });
+    console.error('OpenAI error:', error);
+    res.status(500).json({ risk: 'error', message: 'Failed to analyze behavior.' });
   }
 });
 
-const port = process.env.PORT || 3000;
+// Start server
 app.listen(port, () => {
-  console.log(`Backend running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
