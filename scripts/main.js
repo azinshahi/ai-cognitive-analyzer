@@ -4,9 +4,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const resultArea = document.getElementById("result");
 
   analyzeButton.addEventListener("click", function () {
-    const userInput = inputBox.value.trim();
+    const userInput = inputBox.value;
 
-    if (userInput === "") {
+    if (!userInput || userInput.trim() === "") {
       resultArea.innerText = "Please enter a behavior to analyze.";
       return;
     }
