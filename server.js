@@ -8,6 +8,8 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+
 app.post('/analyze', async (req, res) => {
   const { behavior } = req.body;
 
@@ -16,22 +18,20 @@ app.post('/analyze', async (req, res) => {
   }
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'claude-2.1',
+        max_tokens: 500,
         messages: [
           {
-            role: 'system',
-            content: 'You are a cybersecurity assistant. Assess the risk level of user behavior and explain why.'
-          },
-          {
             role: 'user',
-            content: behavior
+            content: `You are a cybersecurity assistant. Assess the risk level of this behavior and explain why: ${behavior}`
           }
         ]
       })
@@ -40,11 +40,11 @@ app.post('/analyze', async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('🔴 OpenAI error:', data);
-      return res.status(500).json({ risk: 'error', message: 'OpenAI API failed.' });
+      console.error('🔴 Anthropic error:', data);
+      return res.status(500).json({ risk: 'error', message: 'Anthropic API failed.' });
     }
 
-    const reply = data.choices[0].message.content;
+    const reply = data.content[0].text;
     res.json({ risk: 'high', message: reply });
   } catch (error) {
     console.error('🔴 Unexpected error:', error.message);
