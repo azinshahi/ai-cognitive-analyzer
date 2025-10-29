@@ -4,13 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Cognitive Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --font-color: #4a4a4a;
+      --background-color: #fdfdfd;
+      --accent-pink: #ff4c7c;
+    }
+
     body {
       margin: 0;
       padding: 0;
-      background-color: #f5f5dc; /* beige */
-      color: #111; /* black */
-      font-family: 'Helvetica Neue', sans-serif;
+      background-color: var(--background-color);
+      color: var(--font-color);
+      font-family: 'Montserrat', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -19,56 +26,61 @@
     }
 
     h1 {
-      font-weight: 400;
-      margin-bottom: 1rem;
-      letter-spacing: 0.5px;
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      text-align: center;
+      letter-spacing: 1px;
     }
 
     form {
       display: flex;
       flex-direction: column;
-      width: 100%;
-      max-width: 400px;
       gap: 1rem;
+      width: 100%;
+      max-width: 500px;
+      padding: 0 1rem;
     }
 
-    textarea {
-      background: none;
-      border: 1px solid #111;
-      padding: 1rem;
+    input[type="text"] {
+      padding: 0.75rem 1rem;
       font-size: 1rem;
-      resize: vertical;
-      color: #111;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      color: var(--font-color);
+      background-color: #fff;
     }
 
     button {
-      background: #111;
-      color: #f5f5dc;
+      background-color: var(--accent-pink);
+      color: #fff;
       border: none;
       padding: 0.75rem;
       font-size: 1rem;
+      font-weight: 600;
+      border-radius: 4px;
       cursor: pointer;
       transition: background 0.2s ease;
     }
 
     button:hover {
-      background: #333;
+      background-color: #e03c6b;
     }
 
     .output {
       margin-top: 2rem;
       max-width: 600px;
+      padding: 0 1rem;
       font-size: 1rem;
       line-height: 1.5;
-      border-top: 1px solid #111;
-      padding-top: 1rem;
+      border-top: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
   <h1>AI Cognitive Analyzer</h1>
   <form id="analyzer-form">
-    <textarea id="behavior" rows="4" placeholder="Describe the user behavior..."></textarea>
+    <input type="text" id="behavior" placeholder="Describe user behavior..." />
     <button type="submit">Analyze</button>
   </form>
   <div class="output" id="output"></div>
@@ -80,7 +92,6 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const behavior = document.getElementById('behavior').value;
-
       output.textContent = 'Analyzing...';
 
       try {
