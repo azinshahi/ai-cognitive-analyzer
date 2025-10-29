@@ -8,9 +8,9 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: #f5f5dc; /* beige */
-      color: #111; /* black */
-      font-family: 'Helvetica Neue', sans-serif;
+      background-color: #e8e6e3; /* beige-gray */
+      color: #1a1a1a; /* deep charcoal */
+      font-family: 'Helvetica Neue', 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -34,16 +34,16 @@
 
     textarea {
       background: none;
-      border: 1px solid #111;
+      border: 1px solid #1a1a1a;
       padding: 1rem;
       font-size: 1rem;
       resize: vertical;
-      color: #111;
+      color: #1a1a1a;
     }
 
     button {
-      background: #111;
-      color: #f5f5dc;
+      background: #1a1a1a;
+      color: #e8e6e3;
       border: none;
       padding: 0.75rem;
       font-size: 1rem;
@@ -56,46 +56,4 @@
     }
 
     .output {
-      margin-top: 2rem;
-      max-width: 600px;
-      font-size: 1rem;
-      line-height: 1.5;
-      border-top: 1px solid #111;
-      padding-top: 1rem;
-    }
-  </style>
-</head>
-<body>
-  <h1>AI Cognitive Analyzer</h1>
-  <form id="analyzer-form">
-    <textarea id="behavior" rows="4" placeholder="Describe the user behavior..."></textarea>
-    <button type="submit">Analyze</button>
-  </form>
-  <div class="output" id="output"></div>
-
-  <script>
-    const form = document.getElementById('analyzer-form');
-    const output = document.getElementById('output');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const behavior = document.getElementById('behavior').value;
-
-      output.textContent = 'Analyzing...';
-
-      try {
-        const res = await fetch('/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ behavior })
-        });
-
-        const data = await res.json();
-        output.innerHTML = `<strong>Risk Level:</strong> ${data.risk}<br><br><strong>Explanation:</strong><br>${data.message}`;
-      } catch (err) {
-        output.textContent = 'Error analyzing behavior.';
-      }
-    });
-  </script>
-</body>
-</html>
+     
