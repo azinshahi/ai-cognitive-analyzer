@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Cognitive Analyzer</title>
+
+  <!-- Font: Montserrat (similar to ALMA aesthetic) -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+
   <style>
     :root {
-      --font-color: #4a4a4a;
-      --background-color: #fdfdfd;
-      --accent-pink: #ff4c7c;
+      --font-color: #4a4a4a;         /* soft gray text */
+      --background-color: #fdfdfd;   /* clean white background */
+      --accent-pink: #ff4c7c;        /* ALMA-style pink button */
     }
 
     body {
@@ -79,10 +82,12 @@
 </head>
 <body>
   <h1>AI Cognitive Analyzer</h1>
+
   <form id="analyzer-form">
     <input type="text" id="behavior" placeholder="Describe user behavior..." />
     <button type="submit">Analyze</button>
   </form>
+
   <div class="output" id="output"></div>
 
   <script>
@@ -95,7 +100,7 @@
       output.textContent = 'Analyzing...';
 
       try {
-        const res = await fetch('/analyze', {
+        const res = await fetch('https://your-backend-url.onrender.com/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ behavior })
