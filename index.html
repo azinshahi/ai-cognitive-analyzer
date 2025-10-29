@@ -1,62 +1,101 @@
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const PORT = process.env.PORT || 3000;
-
-app.post('/analyze', async (req, res) => {
-  const { behavior } = req.body;
-
-  if (!behavior) {
-    return res.status(400).json({
-      risk: 'error',
-      message: 'No behavior provided.'
-    });
-  }
-
-  try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'mistral/mixtral-8x7b',
-        messages: [
-          { role: 'system', content: 'You are a cybersecurity assistant. Assess risk level and explain.' },
-          { role: 'user', content: behavior }
-        ]
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(500).json({
-        risk: 'error',
-        message: data?.error?.message || 'OpenRouter API failed.'
-      });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Cognitive Analyzer</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5dc; /* beige */
+      color: #111; /* black */
+      font-family: 'Helvetica Neue', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
 
-    const reply = data.choices?.[0]?.message?.content || 'No response';
-    res.json({
-      risk: 'high',
-      message: reply
-    });
-  } catch (error) {
-    res.status(500).json({
-      risk: 'error',
-      message: error.message || 'Unexpected server error.'
-    });
-  }
-});
+    h1 {
+      font-weight: 400;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+    }
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+    form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 400px;
+      gap: 1rem;
+    }
+
+    textarea {
+      background: none;
+      border: 1px solid #111;
+      padding: 1rem;
+      font-size: 1rem;
+      resize: vertical;
+      color: #111;
+    }
+
+    button {
+      background: #111;
+      color: #f5f5dc;
+      border: none;
+      padding: 0.75rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    .output {
+      margin-top: 2rem;
+      max-width: 600px;
+      font-size: 1rem;
+      line-height: 1.5;
+      border-top: 1px solid #111;
+      padding-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Cognitive Analyzer</h1>
+  <form id="analyzer-form">
+    <textarea id="behavior" rows="4" placeholder="Describe the user behavior..."></textarea>
+    <button type="submit">Analyze</button>
+  </form>
+  <div class="output" id="output"></div>
+
+  <script>
+    const form = document.getElementById('analyzer-form');
+    const output = document.getElementById('output');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const behavior = document.getElementById('behavior').value;
+
+      output.textContent = 'Analyzing...';
+
+      try {
+        const res = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ behavior })
+        });
+
+        const data = await res.json();
+        output.innerHTML = `<strong>Risk Level:</strong> ${data.risk}<br><br><strong>Explanation:</strong><br>${data.message}`;
+      } catch (err) {
+        output.textContent = 'Error analyzing behavior.';
+      }
+    });
+  </script>
+</body>
+</html>
