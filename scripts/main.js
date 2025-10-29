@@ -27,7 +27,7 @@ app.post('/analyze', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'openchat/openchat-3.5',
+        model: 'mistral/mixtral-8x7b',
         messages: [
           { role: 'system', content: 'You are a cybersecurity assistant. Assess risk level and explain.' },
           { role: 'user', content: behavior }
@@ -36,6 +36,7 @@ app.post('/analyze', async (req, res) => {
     });
 
     const data = await response.json();
+    console.log('🔍 OpenRouter raw response:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
       return res.status(500).json({
@@ -54,6 +55,7 @@ app.post('/analyze', async (req, res) => {
       message: reply
     });
   } catch (error) {
+    console.error('❌ Server error:', error);
     res.status(500).json({
       risk: 'error',
       message: error.message || 'Unexpected server error.'
