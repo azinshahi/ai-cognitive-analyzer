@@ -3,12 +3,10 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 
 const app = express();
-const port = process.env.PORT || 3000;
-
 app.use(cors());
 app.use(express.json());
 
-const COHERE_API_KEY = process.env.COHERE_API_KEY;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 app.post('/analyze', async (req, res) => {
   const { behavior } = req.body;
@@ -18,37 +16,28 @@ app.post('/analyze', async (req, res) => {
   }
 
   try {
-    const response = await fetch('https://api.cohere.ai/v1/chat', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${COHERE_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'command-r-plus',
-        message: `You are a cybersecurity assistant. Assess the risk level of this behavior and explain why: ${behavior}`,
-        temperature: 0.3
+        model: 'mistral/mixtral-8x7b',
+        messages: [
+          { role: 'system', content: 'You are a cybersecurity assistant. Assess risk level and explain.' },
+          { role: 'user', content: behavior }
+        ]
       })
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      console.error('🔴 Cohere error:', data);
-      return res.status(500).json({
-        risk: 'error',
-        message: data.message || 'Cohere API failed.'
-      });
-    }
-
-    const reply = data.text || 'No response from Cohere.';
+    const reply = data.choices?.[0]?.message?.content || 'No response';
     res.json({ risk: 'high', message: reply });
   } catch (error) {
-    console.error('🔴 Unexpected error:', error.message);
-    res.status(500).json({ risk: 'error', message: 'Failed to analyze behavior.' });
+    res.status(500).json({ risk: 'error', message: error.message });
   }
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Server running on port ${port}`);
-});
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`✅ Server running on port ${port}`));
