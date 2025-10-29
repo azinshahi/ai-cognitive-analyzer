@@ -27,7 +27,7 @@ app.post('/analyze', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'mistral/mixtral-8x7b',
+        model: 'openchat/openchat-3.5',
         messages: [
           { role: 'system', content: 'You are a cybersecurity assistant. Assess risk level and explain.' },
           { role: 'user', content: behavior }
