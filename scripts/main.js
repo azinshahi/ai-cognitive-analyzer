@@ -1,44 +1,26 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const inputBox = document.getElementById("behaviorInput");
-  const analyzeButton = document.getElementById("analyzeButton");
-  const resultArea = document.getElementById("result");
+import express from 'express';
+import cors from 'cors';
+import fetch from 'node-fetch';
 
-  analyzeButton.addEventListener("click", function () {
-    const userInput = inputBox.value;
+const app = express();
+const PORT = process.env.PORT || 3000;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-    // Show what input is being captured
-    resultArea.innerText = `Captured input: "${userInput}"`;
+app.use(cors());
+app.use(express.json());
 
-    if (!userInput || userInput.trim() === "") {
-      setTimeout(() => {
-        resultArea.innerText = "Please enter a behavior to analyze.";
-      }, 1500);
-      return;
-    }
+/**
+ * Analyze risky behavior using OpenRouter AI
+ */
+app.post('/analyze', async (req, res) => {
+  const { behavior } = req.body;
 
-    setTimeout(() => {
-      resultArea.innerText = "Analyzing...";
+  if (!behavior) {
+    return res.status(400).json({
+      risk: 'error',
+      message: 'Missing behavior input.'
+    });
+  }
 
-      fetch("https://cognitive-analyzer-backend.onrender.com/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ behavior: userInput })
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then(data => {
-          resultArea.innerText = `${data.risk.toUpperCase()}: ${data.message}`;
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          resultArea.innerText = "Something went wrong. Please try again.";
-        });
-    }, 1500);
-  });
-});
+  try {
+    const response = await fetch('https://openrouter.ai
