@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Cognitive Analyzer</title>
 
-  <!-- Font: Montserrat (similar to ALMA aesthetic) -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Font: Montserrat (clean, bold, modern) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      --font-color: #4a4a4a;         /* soft gray text */
-      --background-color: #fdfdfd;   /* clean white background */
-      --accent-pink: #ff4c7c;        /* ALMA-style pink button */
+      --font-color: #4a4a4a;
+      --background-color: #fdfdfd;
+      --accent-pink: #ff4c7c;
     }
 
     body {
@@ -29,8 +29,8 @@
     }
 
     h1 {
-      font-size: 2.5rem;
-      font-weight: 600;
+      font-size: 3rem;
+      font-weight: 700;
       margin-bottom: 2rem;
       text-align: center;
       letter-spacing: 1px;
@@ -81,7 +81,7 @@
   </style>
 </head>
 <body>
-  <h1>AI Cognitive Analyzer</h1>
+  <h1>EXPLORE & INNOVATE</h1>
 
   <form id="analyzer-form">
     <input type="text" id="behavior" placeholder="Describe user behavior..." />
@@ -100,7 +100,7 @@
       output.textContent = 'Analyzing...';
 
       try {
-        const res = await fetch('https://your-backend-url.onrender.com/analyze', {
+        const res = await fetch('https://ai-cognitive-analyzer.onrender.com/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ behavior })
